@@ -118,7 +118,7 @@ btnLogin.addEventListener('click',(event)=>{
   event.preventDefault();
   
   currentAccount = accounts.find(account => account.username === inputLoginUsername.value);
-  console.log(currentAccount);
+
   if(currentAccount?.pin === Number(inputLoginPin.value)){
   
    labelWelcome.textContent = `Welcome back, ${currentAccount.owner.split(' ')[0]}`; 
@@ -157,3 +157,15 @@ btnClose.addEventListener('click',(event)=>{
     containerApp.style.opacity = 0;
   };
 });
+
+btnLoan.addEventListener('click',(event)=>{
+  event.preventDefault();
+  const amount = Number(inputLoanAmount.value);
+  inputLoanAmount.value = '';
+  
+  if(amount > 0 && currentAccount.movements.some(movment=> movment >= amount*0.1)){
+    currentAccount.movements.push(amount);
+
+    updateUI(currentAccount);
+  }
+})
