@@ -61,3 +61,56 @@ const inputLoanAmount = document.querySelector('.form__input--loan-amount');
 const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
+//Functions
+const displayMovements = movements => {
+  containerMovements.innerHTML = '';
+  movements.forEach((movement, index) => {
+    const type = movement > 0 ? 'deposit' : 'withdrawal';
+    const html = `
+        <div class="movements__row">
+          <div class="movements__type movements__type--${type}">${index + 1} ${type}</div>
+          <div class="movements__value">${movement}</div>
+        </div>
+    `;
+    containerMovements.insertAdjacentHTML('afterbegin', html);
+  });
+};
+
+
+const createUsernames = accounts => {
+  accounts.forEach((account)=>{
+    account.username = account.owner.toLowerCase().split(' ').map(name => name[0]).join('');
+  });
+};
+
+createUsernames(accounts);
+
+const calcDisplaySummary = (account) => {
+  const incomes = account.movements.filter(movement=> movement>0).reduce((acc,movement)=> acc+movement,0);
+  labelSumIn.textContent = `${incomes}€`;
+
+  const outcomes = account.movements.filter(movement=>movement<0).reduce((acc,movement)=>acc+movement,0);
+  labelSumOut.textContent =  `${Math.abs(outcomes)}€`;
+
+  const interest = account.movements.filter(movement=>movement>0).map(deposit=> deposit*account.interestRate/100).filter(int=>int>=1).reduce((acc,int)=>acc+int,0);
+  labelSumInterest.textContent = `${interest}€`
+}
+
+
+const calcDisplayBalance = (account) => {
+  account.balance = account.movements.reduce((acc,movment)=>acc+movment,0)
+  labelBalance.textContent = `${account.balance}€`;
+}
+
+const updateUI = (account) => {
+
+  displayMovements(account.movements);
+
+  calcDisplayBalance(account);
+
+  calcDisplaySummary(account);
+}
+
+
+let currentAccount;
+
