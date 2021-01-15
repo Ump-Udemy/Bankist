@@ -131,3 +131,15 @@ btnLogin.addEventListener('click',(event)=>{
 
   }
 });
+
+btnTransfer.addEventListener('click',(event)=>{
+  event.preventDefault();
+  const amount = Number(inputTransferAmount.value);
+  const receiverAccount = accounts.find(account => account.username === inputTransferTo.value);
+  inputTransferAmount.value = inputTransferTo.value = '';
+  if(amount > 0 && receiverAccount && currentAccount.balance >= amount && receiverAccount?.username !== currentAccount.username ){
+    currentAccount.movements.push(-amount);
+    receiverAccount.movements.push(amount);
+    updateUI(currentAccount);
+  }
+})
