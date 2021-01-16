@@ -77,17 +77,25 @@ const inputClosePin = document.querySelector('.form__input--pin');
 let currentAccount;
 let sorted = false;
 
+
 //Functions
-const displayMovements = (mov,sort = false) => {
+const displayMovements = (account,sort = false) => {
   containerMovements.innerHTML = '';
 
-  const movements = sort ? mov.slice().sort((a,b)=>a-b):mov ; 
-
+  const movements = sort ? account.movements.slice().sort((a,b)=>a-b):account.movements ; 
+  
   movements.forEach((movement, index) => {
     const type = movement > 0 ? 'deposit' : 'withdrawal';
+    const date = new Date(account.movementsDates[index]);
+    const day = `${date.getDate()}`.padStart(2,0);
+    const month = `${date.getMonth()+1}`.padStart(2,0);
+    const year = date.getFullYear();
+    const displayDate = `${day}/${month}/${year}`;
+
     const html = `
         <div class="movements__row">
           <div class="movements__type movements__type--${type}">${index + 1} ${type}</div>
+          <div class="movements__date">${displayDate}</div>
           <div class="movements__value">${movement.toFixed(2)}€</div>
         </div>
     `;
@@ -123,7 +131,7 @@ const calcDisplayBalance = (account) => {
 
 const updateUI = (account) => {
 
-  displayMovements(account.movements);
+  displayMovements(account);
 
   calcDisplayBalance(account);
 
@@ -139,14 +147,21 @@ btnLogin.addEventListener('click',(event)=>{
   currentAccount = accounts.find(account => account.username === inputLoginUsername.value);
 
   if(currentAccount?.pin === Number(inputLoginPin.value)){
-  
-   labelWelcome.textContent = `Welcome back, ${currentAccount.owner.split(' ')[0]}`; 
-   containerApp.style.opacity = 100;
+    const now = new Date();
+    const day = `${now.getDate()}`.padStart(2,0);
+    const month = `${now.getMonth()+1}`.padStart(2,0);
+    const year = now.getFullYear();
+    const hour = `${now.getHours()}`.padStart(2,0);
+    const minute = `${now.getMinutes()}`.padStart(2,0);
 
-   inputLoginUsername.value = inputLoginPin.value = '';
-   inputLoginPin.blur();
+    labelDate.textContent = `${day}/${month}/${year}, ${hour}:${minute}`
+    labelWelcome.textContent = `Welcome back, ${currentAccount.owner.split(' ')[0]}`; 
+    containerApp.style.opacity = 100;
 
-   updateUI(currentAccount);
+    inputLoginUsername.value = inputLoginPin.value = '';
+    inputLoginPin.blur();
+
+    updateUI(currentAccount);
 
   }
 });
@@ -159,6 +174,10 @@ btnTransfer.addEventListener('click',(event)=>{
   if(amount > 0 && receiverAccount && currentAccount.balance >= amount && receiverAccount?.username !== currentAccount.username ){
     currentAccount.movements.push(-amount);
     receiverAccount.movements.push(amount);
+
+    currentAccount.movementsDates.push(new Date().toISOString());
+    receiverAccount.movementsDates.push(new Date().toISOString());
+
     updateUI(currentAccount);
   }
 })
@@ -183,13 +202,21 @@ btnLoan.addEventListener('click',(event)=>{
   inputLoanAmount.value = '';
   if(amount > 0 && currentAccount.movements.some(movment=> movment >= amount*0.1)){
     currentAccount.movements.push(amount);
+
+    currentAccount.movementsDates.push(new Date().toISOString());
+
     updateUI(currentAccount);
   }
 })
 
 btnSort.addEventListener('click',(event)=>{
   event.preventDefault();
-  displayMovements(currentAccount.movements,!sorted);
+  displayMovements(currentAccount,!sorted);
   sorted = !sorted;
 })
 
+
+//
+// currentAccount = account1;
+// updateUI(currentAccount);
+// containerApp.style.opacity = 100;
