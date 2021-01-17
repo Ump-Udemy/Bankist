@@ -74,7 +74,7 @@ const inputLoanAmount = document.querySelector('.form__input--loan-amount');
 const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
-let currentAccount;
+let currentAccount, timer;
 let sorted = false;
 
 
@@ -163,6 +163,27 @@ const updateUI = (account) => {
   calcDisplaySummary(account);
 }
 
+const startLogoutTimer = () => {
+  let time = 300;
+  const tick = ()=>{
+    
+    const min = String(Math.trunc(time/60)).padStart(2,0);
+    const sec = String(time % 60).padStart(2,0);
+    labelTimer.textContent = `${min}:${sec}`;
+    if(time === 0) {
+      clearInterval(timer);
+      labelWelcome.textContent = 'Log in to get started'; 
+      containerApp.style.opacity = 0;
+    }
+    time--;
+    
+  }
+  tick();
+  const timer = setInterval(tick,1000);
+  
+  return timer;
+}
+
 
 
 //eventHandler
@@ -180,6 +201,7 @@ btnLogin.addEventListener('click',(event)=>{
       month: 'numeric',
       year: 'numeric',
     }
+    
     // const day = `${now.getDate()}`.padStart(2,0);
     // const month = `${now.getMonth()+1}`.padStart(2,0);
     // const year = now.getFullYear();
@@ -193,7 +215,9 @@ btnLogin.addEventListener('click',(event)=>{
 
     inputLoginUsername.value = inputLoginPin.value = '';
     inputLoginPin.blur();
+    if(timer) clearInterval(timer);
 
+    timer = startLogoutTimer();
     updateUI(currentAccount);
 
   }
@@ -234,11 +258,13 @@ btnLoan.addEventListener('click',(event)=>{
   const amount = Math.floor(inputLoanAmount.value);
   inputLoanAmount.value = '';
   if(amount > 0 && currentAccount.movements.some(movment=> movment >= amount*0.1)){
-    currentAccount.movements.push(amount);
+    setTimeout(()=>{
+      currentAccount.movements.push(amount);
 
-    currentAccount.movementsDates.push(new Date().toISOString());
-
-    updateUI(currentAccount);
+      currentAccount.movementsDates.push(new Date().toISOString());
+  
+      updateUI(currentAccount);
+    },2500);
   }
 })
 
