@@ -19,7 +19,7 @@ const account1 = {
     '2020-05-08T14:11:59.604Z',
     '2020-05-27T17:01:17.194Z',
     '2020-07-11T23:36:17.929Z',
-    '2020-07-12T10:51:36.790Z',
+    '2021-01-12T10:51:36.790Z',
   ],
   currency: 'EUR',
   locale: 'pt-PT', // de-DE
@@ -78,7 +78,22 @@ let currentAccount;
 let sorted = false;
 
 
+
 //Functions
+const formatMovementDate = (date,locale) =>{
+  const calcDaysPassed = (date1,date2) => Math.round(Math.abs(date2-date1)/( 1000 * 60 * 60 * 24));
+  const dayPassed =  calcDaysPassed(new Date(),date);
+  if(dayPassed === 0) return 'Today';
+  if(dayPassed === 1) return 'Yesterday';
+  if(dayPassed <= 7) return `${dayPassed} days ago`;
+  else{
+    // const day = `${date.getDate()}`.padStart(2,0);
+    // const month = `${date.getMonth()+1}`.padStart(2,0);
+    // const year = date.getFullYear();
+    // return `${day}/${month}/${year}`;
+    return new Intl.DateTimeFormat(locale).format(date);
+  }
+}
 const displayMovements = (account,sort = false) => {
   containerMovements.innerHTML = '';
 
@@ -87,11 +102,8 @@ const displayMovements = (account,sort = false) => {
   movements.forEach((movement, index) => {
     const type = movement > 0 ? 'deposit' : 'withdrawal';
     const date = new Date(account.movementsDates[index]);
-    const day = `${date.getDate()}`.padStart(2,0);
-    const month = `${date.getMonth()+1}`.padStart(2,0);
-    const year = date.getFullYear();
-    const displayDate = `${day}/${month}/${year}`;
-
+    const displayDate = formatMovementDate(date,account.locale) ;
+    
     const html = `
         <div class="movements__row">
           <div class="movements__type movements__type--${type}">${index + 1} ${type}</div>
@@ -148,13 +160,21 @@ btnLogin.addEventListener('click',(event)=>{
 
   if(currentAccount?.pin === Number(inputLoginPin.value)){
     const now = new Date();
-    const day = `${now.getDate()}`.padStart(2,0);
-    const month = `${now.getMonth()+1}`.padStart(2,0);
-    const year = now.getFullYear();
-    const hour = `${now.getHours()}`.padStart(2,0);
-    const minute = `${now.getMinutes()}`.padStart(2,0);
+    const options = {
+      hour: 'numeric',
+      minute : 'numeric',
+      day: 'numeric',
+      month: 'numeric',
+      year: 'numeric',
+    }
+    // const day = `${now.getDate()}`.padStart(2,0);
+    // const month = `${now.getMonth()+1}`.padStart(2,0);
+    // const year = now.getFullYear();
+    // const hour = `${now.getHours()}`.padStart(2,0);
+    // const minute = `${now.getMinutes()}`.padStart(2,0);
 
-    labelDate.textContent = `${day}/${month}/${year}, ${hour}:${minute}`
+    // labelDate.textContent = `${day}/${month}/${year}, ${hour}:${minute}`
+    labelDate.textContent = new Intl.DateTimeFormat(currentAccount.locale,options).format(now);
     labelWelcome.textContent = `Welcome back, ${currentAccount.owner.split(' ')[0]}`; 
     containerApp.style.opacity = 100;
 
